@@ -7,7 +7,9 @@
         </div>
     </div>
     <!-- Javascript -->
-    <script>var hostUrl = "<?php echo url('theme/dist/assets/'); ?>";</script>
+    <script>
+        var hostUrl = "<?php echo url('theme/dist/assets/'); ?>";
+    </script>
     <script src="<?php echo url('theme/dist/assets/plugins/global/plugins.bundle.js'); ?>"></script>
     <script src="<?php echo url('theme/dist/assets/js/scripts.bundle.js'); ?>"></script>
     <script src="<?php echo url('theme/dist/assets/js/custom/authentication/sign-in/general.js'); ?>"></script>
@@ -28,7 +30,9 @@
     </div> <!-- end .app-root -->
     <!-- Javascript -->
     <!--begin::Vendors Javascript(used for this page only)-->
-    <script>var hostUrl = "<?php echo url('theme/dist/assets/'); ?>";</script>
+    <script>
+        var hostUrl = "<?php echo url('theme/dist/assets/'); ?>";
+    </script>
     <script src="<?php echo url('theme/dist/assets/plugins/global/plugins.bundle.js'); ?>"></script>
     <script src="<?php echo url('theme/dist/assets/js/scripts.bundle.js'); ?>"></script>
     <script src="<?php echo url('theme/dist/assets/js/custom/apps/chat/chat.js'); ?>"></script>
@@ -38,11 +42,11 @@
 <?php endif; ?>
 <script>
     // Show flash messages using toastr if available
-    (function () {
+    (function() {
         var f = window.__flash || {};
         try {
             if (typeof toastr !== 'undefined') {
-                Object.keys(f).forEach(function (k) {
+                Object.keys(f).forEach(function(k) {
                     var msg = f[k];
                     if (!msg) return;
                     if (k === 'success') toastr.success(msg);
@@ -50,30 +54,38 @@
                 });
             } else {
                 // fallback: log
-                Object.keys(f).forEach(function (k) { if (f[k]) console.log(k + ': ' + f[k]); });
+                Object.keys(f).forEach(function(k) {
+                    if (f[k]) console.log(k + ': ' + f[k]);
+                });
             }
-        } catch (e) { console.error('toastr display failed', e); }
+        } catch (e) {
+            console.error('toastr display failed', e);
+        }
     })();
 </script>
 <script>
     // Initialize Select2 for enhanced selects if plugin present
-    (function () {
+    (function() {
         try {
             if (typeof $ !== 'undefined' && typeof $.fn !== 'undefined' && typeof $.fn.select2 !== 'undefined') {
-                document.querySelectorAll('.select2').forEach(function (el) {
+                document.querySelectorAll('.select2').forEach(function(el) {
                     if (!$(el).data('select2')) {
-                        $(el).select2({ width: '100%' });
+                        $(el).select2({
+                            width: '100%'
+                        });
                     }
                 });
             }
-        } catch (e) { console.error('Select2 init failed', e); }
+        } catch (e) {
+            console.error('Select2 init failed', e);
+        }
     })();
 </script>
 
 <script>
-    $(document).ready(function () {
+    $(document).ready(function() {
         // Generic: initialize a datatable per card (if any) and bind its local filters
-        $('.card').each(function () {
+        $('.card').each(function() {
             var card = $(this);
             var tableEl = card.find('table').first();
             if (!tableEl || tableEl.length === 0) return;
@@ -86,12 +98,12 @@
             });
 
             // search input within this card
-            card.find('input[data-kt-customer-table-filter="search"]').on('keyup', function () {
+            card.find('input[data-kt-customer-table-filter="search"]').on('keyup', function() {
                 dt.search(this.value).draw();
             });
 
             // Month select filter in card
-            card.find('select[data-kt-customer-table-filter="month"]').on('change', function () {
+            card.find('select[data-kt-customer-table-filter="month"]').on('change', function() {
                 var val = $(this).val();
                 if (val) {
                     // We try to search in the whole table or a logical column; fallback to global search
@@ -102,7 +114,7 @@
             });
 
             // Payment type filter (radio) within card
-            card.find('input[name="payment_type"]').on('change', function () {
+            card.find('input[name="payment_type"]').on('change', function() {
                 var val = $(this).val();
                 if (val === 'all') {
                     dt.search('').draw();
@@ -112,14 +124,13 @@
             });
 
             // Reset filters within this card
-            card.find('[data-kt-customer-table-filter="reset"]').on('click', function () {
+            card.find('[data-kt-customer-table-filter="reset"]').on('click', function() {
                 dt.search('').columns().search('').draw();
                 card.find('input[name="payment_type"][value="all"]').prop('checked', true);
                 card.find('select[data-kt-customer-table-filter="month"]').val('').trigger('change');
             });
         });
     });
-
 </script>
 <!-- Global confirm delete modal -->
 <div class="modal fade" id="modalConfirmDelete" tabindex="-1" aria-labelledby="modalConfirmDeleteLabel" aria-hidden="true">
@@ -144,9 +155,9 @@
     </div>
 </div>
 <script>
-    (function(){
+    (function() {
         // When a .btn-open-delete-modal is clicked, populate modal form and show
-        document.addEventListener('click', function(e){
+        document.addEventListener('click', function(e) {
             const el = e.target.closest('.btn-open-delete-modal');
             if (!el) return;
             e.preventDefault();
@@ -166,8 +177,8 @@
         });
     })();
     // Generic edit button handler for subjects (and others) using data-* attributes
-    (function(){
-        document.addEventListener('click', function(e){
+    (function() {
+        document.addEventListener('click', function(e) {
             var el = e.target.closest('.btn-edit-subject');
             if (!el) return;
             e.preventDefault();
@@ -183,8 +194,16 @@
             document.getElementById('edit_subject_name').value = name;
             document.getElementById('edit_subject_code').value = code;
             document.getElementById('edit_subject_description').value = desc;
-            if (est) { $('#edit_subject_est').val(est).trigger('change'); } else { $('#edit_subject_est').val('').trigger('change'); }
-            if (dept) { $('#edit_subject_dept').val(dept).trigger('change'); } else { $('#edit_subject_dept').val('').trigger('change'); }
+            if (est) {
+                $('#edit_subject_est').val(est).trigger('change');
+            } else {
+                $('#edit_subject_est').val('').trigger('change');
+            }
+            if (dept) {
+                $('#edit_subject_dept').val(dept).trigger('change');
+            } else {
+                $('#edit_subject_dept').val('').trigger('change');
+            }
             var bs = bootstrap.Modal.getInstance(modal) || new bootstrap.Modal(modal);
             bs.show();
         });
@@ -192,23 +211,23 @@
 </script>
 <script>
     // Update role description text for create/edit role selects
-    (function(){
+    (function() {
         // On page load, set create role description if present
         var createSel = document.getElementById('create_user_role');
         if (createSel) {
             var descEl = document.getElementById('createRoleDesc');
             var selectedDesc = createSel.selectedOptions && createSel.selectedOptions[0] ? createSel.selectedOptions[0].dataset.desc : '';
             if (descEl) descEl.textContent = selectedDesc || '';
-            createSel.addEventListener('change', function(e){
+            createSel.addEventListener('change', function(e) {
                 var d = e.target.selectedOptions && e.target.selectedOptions[0] ? e.target.selectedOptions[0].dataset.desc : '';
                 if (descEl) descEl.textContent = d || '';
             });
         }
 
         // For any edit role selects, use delegated change handler
-        document.addEventListener('change', function(e){
+        document.addEventListener('change', function(e) {
             var el = e.target;
-            if(!el) return;
+            if (!el) return;
             if (el.id && el.id.indexOf('edit_role_select_') === 0) {
                 var id = el.id.split('_').pop();
                 var desc = el.selectedOptions && el.selectedOptions[0] ? el.selectedOptions[0].dataset.desc : '';
@@ -217,4 +236,12 @@
             }
         });
     })();
+</script>
+<script>
+    $("#kt_datepicker_7").flatpickr({
+        altInput: true,
+        altFormat: "F j, Y",
+        dateFormat: "Y-m-d",
+        mode: "range"
+    });
 </script>

@@ -51,56 +51,31 @@ require __DIR__ . '/../../layouts/header.php'; ?>
         <!-- Import modal -->
         <div class="modal fade" id="modalImportReports" tabindex="-1" aria-labelledby="modalImportReportsLabel"
             aria-hidden="true">
-            <div class="modal-dialog modal-md modal-dialog-centered">
+            <div class="modal-dialog modal-md">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="modalImportReportsLabel">Générer un rapport</h5>
+                        <h5 class="modal-title" id="modalImportReportsLabel">Importer des rapports (CSV)</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <form method="POST" action="<?php echo url('reports/generate'); ?>" enctype="multipart/form-data">
+                    <form method="POST" action="<?php echo url('reports'); ?>" enctype="multipart/form-data">
                         <?php echo csrf_field(); ?>
-
                         <div class="modal-body">
-
-
-
-                            <!-- Période -->
                             <div class="mb-3">
-                                <label class="form-label">Période</label>
-                                <input type="date" id="kt_datepicker_7" name="period" class="form-control" required>
+                                <label class="form-label">Fichier CSV</label>
+                                <input type="file" name="import_file" accept=".csv,.xlsx,.pdf" class="form-control" />
                             </div>
-
-                            <!-- Départements -->
                             <div class="mb-3">
-                                <label class="form-label">Département</label>
-                                <select name="department_id" class="form-select" required>
-                                    <option value="">Sélectionner un département</option>
-                                    <?php foreach ($departments as $d): ?>
-                                        <option value="<?php echo $d['id']; ?>">
-                                            <?php echo htmlspecialchars($d['name']); ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
+                                <small class="text-muted">Le fichier CSV doit contenir une colonne program_id ou
+                                    ('class' et 'subject') et des colonnes nbr_hours_do, nbr_lesson_do,
+                                    nbr_lesson_dig_do, nbr_tp_do, nbr_tp_dig_do. Le champ created_at peut être
+                                    présent.</small>
                             </div>
-
-                            <!-- Type de rapport -->
-                            <div class="mb-3">
-                                <label class="form-label">Type de rapport</label>
-                                <select name="report_type" class="form-select" required>
-                                    <option value="">Choisir...</option>
-                                    <option value="pdf">PDF</option>
-                                    <option value="excel">Excel</option>
-                                </select>
-                            </div>
-
                         </div>
-
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-                            <button type="submit" class="btn btn-success">Obtenir</button>
+                            <button type="submit" class="btn btn-success">Importer</button>
                         </div>
                     </form>
-
                 </div>
             </div>
         </div>
@@ -229,7 +204,7 @@ require __DIR__ . '/../../layouts/header.php'; ?>
                             data-bs-target="#modalImportReports">Importer</button> -->
                         <?php if ($can_view_all_reports): ?>
                             <button class="btn btn-sm btn-warning ms-3 px-4 py-3" data-bs-toggle="modal"
-                                data-bs-target="#modalImportReports">Rapport spécifique</button>
+                                data-bs-target="#modalReportCreate">Rapport spécifique</button>
                         <?php endif; ?>
                         <?php if ($canRecord): ?>
                             <button class="btn btn-sm btn-success ms-3 px-4 py-3" data-bs-toggle="modal"

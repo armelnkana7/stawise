@@ -1,4 +1,6 @@
-<?php $title = 'Gestion des utilisateurs'; $layout = 'main'; require __DIR__ . '/../../layouts/header.php'; ?>
+<?php $title = 'Gestion des utilisateurs';
+$layout = 'main';
+require __DIR__ . '/../../layouts/header.php'; ?>
 <?php require_once __DIR__ . '/../../../app/Helpers/permissions.php'; ?>
 
 
@@ -105,15 +107,15 @@
                 </div>
 
                 <div class="card-toolbar flex-row-fluid justify-content-end gap-5">
-                        <div class="d-flex">
+                    <div class="d-flex">
                         <button class="btn btn-sm btn-primary ms-3 px-4 py-3" data-bs-toggle="modal" data-bs-target="#modalUserCreate">Nouvel utilisateur</button>
                         <a class="btn btn-sm btn-outline-secondary me-2"
                             href="<?php echo url('reports/export') . (isset($_GET['q']) ? '?q=' . urlencode($_GET['q']) : ''); ?>">Exporter
                             CSV</a>
-                        <button class="btn btn-sm btn-outline-secondary me-2" data-bs-toggle="modal"
+                        <!-- <button class="btn btn-sm btn-outline-secondary me-2" data-bs-toggle="modal"
                             data-bs-target="#modalImportReports">Importer</button>
                         <button class="btn btn-sm btn-success ms-3 px-4 py-3" data-bs-toggle="modal"
-                            data-bs-target="#modalReportCreate">Nouveau rapport</button>
+                            data-bs-target="#modalReportCreate">Nouveau rapport</button> -->
 
                         <!-- Program create modal (small) -->
                         <div class="modal fade" id="modalReportCreate" tabindex="-1" aria-hidden="true">
@@ -198,7 +200,7 @@
                             <div class="modal-dialog">
                                 <div class="modal-content">
                                     <div class="modal-header">
-                                        <h5 class="modal-title">Nouvel utilisateur</h5>
+                                        <h5 class="modal-title">Nouvel utilisateur (Chef de département)</h5>
                                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                     </div>
                                     <div class="modal-body">
@@ -225,10 +227,16 @@
                                                 </select>
                                                 <small id="createRoleDesc" class="text-muted"></small>
                                             </div>
-                                            <?php $permMap = include __DIR__ . '/../../../config/permissions.php'; $allPerms = [];
-                                            foreach ($permMap as $rolePerms) { foreach ($rolePerms as $p => $v) { $allPerms[$p] = true; } } $allPerms = array_keys($allPerms);
+                                            <?php $permMap = include __DIR__ . '/../../../config/permissions.php';
+                                            $allPerms = [];
+                                            foreach ($permMap as $rolePerms) {
+                                                foreach ($rolePerms as $p => $v) {
+                                                    $allPerms[$p] = true;
+                                                }
+                                            }
+                                            $allPerms = array_keys($allPerms);
                                             ?>
-                                            <div class="mb-3">
+                                            <!-- <div class="mb-3">
                                                 <label class="form-label">Permissions avancées (override)</label>
                                                 <div>
                                                     <?php foreach ($allPerms as $p): ?>
@@ -238,7 +246,7 @@
                                                     <?php endforeach; ?>
                                                 </div>
                                                 <small class="text-muted">Ces permissions seront enregistrées comme override pour l'utilisateur (si supportées).</small>
-                                            </div>
+                                            </div> -->
                                             <div class="mb-3">
                                                 <label class="form-label">Département</label>
                                                 <select name="department_id" class="form-control">
@@ -279,98 +287,102 @@
                     <br>
                     Vous pouvez attribuer un rôle à un utilisateur et optionnellement ajouter des permissions spécifiques via les cases "Permissions avancées".
                 </div>
-            <table  id="kt_datatable_zero_configuration" class="table table-row-dashed border-gray-300 align-middle gy-6">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Nom</th>
-                        <th>Email</th>
-                        <th>Role</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                <?php foreach ($users as $u): ?>
-                    <tr>
-                        <td><?php echo $u['id']; ?></td>
-                        <td><?php echo htmlspecialchars($u['full_name']); ?></td>
-                        <td><?php echo htmlspecialchars($u['email']); ?></td>
-                        <td><?php echo htmlspecialchars($u['role_name']); ?></td>
-                        <td>
-                            <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modal-user-edit-<?= $u['id'] ?>">Edit</button>
-                        </td>
-                    
-                    <!-- User edit modal -->
-                    <div class="modal fade" id="modal-user-edit-<?= $u['id'] ?>" tabindex="-1">
-                        <div class="modal-dialog">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title">Modifier l'utilisateur</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <form method="POST" action="<?php echo url('users/update'); ?>">
-                                        <?= csrf_field(); ?>
-                                        <input type="hidden" name="id" value="<?= $u['id'] ?>">
-                                        <div class="mb-3">
-                                            <label class="form-label">Nom</label>
-                                            <input type="text" class="form-control" disabled value="<?= htmlspecialchars($u['full_name']) ?>" />
-                                        </div>
-                                        <div class="mb-3">
-                                            <label class="form-label">Email</label>
-                                            <input type="email" class="form-control" disabled value="<?= htmlspecialchars($u['email']) ?>" />
-                                        </div>
-                                        <div class="mb-3">
-                                            <label class="form-label">Rôle</label>
-                                            <select name="role_id" id="edit_role_select_<?= $u['id'] ?>" class="form-control">
-                                                <?php foreach ($roles as $r): ?>
-                                                    <option value="<?= $r['id'] ?>" data-desc="<?= htmlspecialchars($r['description'] ?? '') ?>" <?= ($r['id'] == $u['role_id']) ? 'selected' : '' ?>><?= htmlspecialchars($r['name']) ?></option>
-                                                <?php endforeach; ?>
-                                            </select>
-                                            <small id="editRoleDesc_<?= $u['id'] ?>" class="text-muted"><?= htmlspecialchars($u['role_name'] ?? '') ?></small>
-                                        </div>
-                                        <div class="mb-3">
-                                            <label class="form-label">Département</label>
-                                            <select name="department_id" class="form-control">
-                                                <option value="">-- Aucun --</option>
-                                                <?php foreach ($depts as $d): ?>
-                                                    <option value="<?= $d['id'] ?>" <?= ($d['id'] == $u['department_id']) ? 'selected' : '' ?>><?= htmlspecialchars($d['name']) ?></option>
-                                                <?php endforeach; ?>
-                                            </select>
-                                        </div>
-                                            <div class="mb-3">
-                                                <label class="form-label">Etablissement</label>
-                                                <select name="establishment_id" class="form-control" <?= isset($_SESSION['role_id']) && !role_has_permission($_SESSION['role_id'], 'switch_establishment') ? 'disabled' : '' ?>>
-                                                <option value="">-- Aucun --</option>
-                                                <?php foreach ($ests as $e): ?>
-                                                    <option value="<?= $e['id'] ?>" <?= ($e['id'] == ($u['establishment_id'] ?? '')) ? 'selected' : '' ?>><?= htmlspecialchars($e['name']) ?></option>
-                                                <?php endforeach; ?>
-                                            </select>
-                                        </div>
-                                        <?php $meta = null; if (!empty($u['meta']) && is_string($u['meta'])) { $meta = json_decode($u['meta'], true); } $userPerms = $meta['permissions'] ?? []; ?>
-                                        <div class="mb-3">
-                                            <label class="form-label">Permissions avancées (override)</label>
-                                            <div>
-                                                <?php foreach ($allPerms as $p): ?>
-                                                    <label class="form-check form-check-inline">
-                                                        <input class="form-check-input" type="checkbox" name="extra_permissions[]" value="<?= $p ?>" <?= in_array($p, $userPerms) ? 'checked' : '' ?>> <span class="form-check-label"><?= htmlspecialchars($p) ?></span>
-                                                    </label>
-                                                <?php endforeach; ?>
+                <table id="kt_datatable_zero_configuration" class="table table-row-dashed border-gray-300 align-middle gy-6">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nom</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($users as $u): ?>
+                            <tr>
+                                <td><?php echo $u['id']; ?></td>
+                                <td><?php echo htmlspecialchars($u['full_name']); ?></td>
+                                <td><?php echo htmlspecialchars($u['email']); ?></td>
+                                <td><?php echo htmlspecialchars($u['role_name']); ?></td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modal-user-edit-<?= $u['id'] ?>">Edit</button>
+                                </td>
+
+                                <!-- User edit modal -->
+                                <div class="modal fade" id="modal-user-edit-<?= $u['id'] ?>" tabindex="-1">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Modifier l'utilisateur</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <form method="POST" action="<?php echo url('users/update'); ?>">
+                                                    <?= csrf_field(); ?>
+                                                    <input type="hidden" name="id" value="<?= $u['id'] ?>">
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Nom</label>
+                                                        <input type="text" class="form-control" disabled value="<?= htmlspecialchars($u['full_name']) ?>" />
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Email</label>
+                                                        <input type="email" class="form-control" disabled value="<?= htmlspecialchars($u['email']) ?>" />
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Rôle</label>
+                                                        <select name="role_id" id="edit_role_select_<?= $u['id'] ?>" class="form-control">
+                                                            <?php foreach ($roles as $r): ?>
+                                                                <option value="<?= $r['id'] ?>" data-desc="<?= htmlspecialchars($r['description'] ?? '') ?>" <?= ($r['id'] == $u['role_id']) ? 'selected' : '' ?>><?= htmlspecialchars($r['name']) ?></option>
+                                                            <?php endforeach; ?>
+                                                        </select>
+                                                        <small id="editRoleDesc_<?= $u['id'] ?>" class="text-muted"><?= htmlspecialchars($u['role_name'] ?? '') ?></small>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Département</label>
+                                                        <select name="department_id" class="form-control">
+                                                            <option value="">-- Aucun --</option>
+                                                            <?php foreach ($depts as $d): ?>
+                                                                <option value="<?= $d['id'] ?>" <?= ($d['id'] == $u['department_id']) ? 'selected' : '' ?>><?= htmlspecialchars($d['name']) ?></option>
+                                                            <?php endforeach; ?>
+                                                        </select>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Etablissement</label>
+                                                        <select name="establishment_id" class="form-control" <?= isset($_SESSION['role_id']) && !role_has_permission($_SESSION['role_id'], 'switch_establishment') ? 'disabled' : '' ?>>
+                                                            <option value="">-- Aucun --</option>
+                                                            <?php foreach ($ests as $e): ?>
+                                                                <option value="<?= $e['id'] ?>" <?= ($e['id'] == ($u['establishment_id'] ?? '')) ? 'selected' : '' ?>><?= htmlspecialchars($e['name']) ?></option>
+                                                            <?php endforeach; ?>
+                                                        </select>
+                                                    </div>
+                                                    <?php $meta = null;
+                                                    if (!empty($u['meta']) && is_string($u['meta'])) {
+                                                        $meta = json_decode($u['meta'], true);
+                                                    }
+                                                    $userPerms = $meta['permissions'] ?? []; ?>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Permissions avancées (override)</label>
+                                                        <div>
+                                                            <?php foreach ($allPerms as $p): ?>
+                                                                <label class="form-check form-check-inline">
+                                                                    <input class="form-check-input" type="checkbox" name="extra_permissions[]" value="<?= $p ?>" <?= in_array($p, $userPerms) ? 'checked' : '' ?>> <span class="form-check-label"><?= htmlspecialchars($p) ?></span>
+                                                                </label>
+                                                            <?php endforeach; ?>
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                                                        <button type="submit" class="btn btn-primary">Enregistrer</button>
+                                                    </div>
+                                                </form>
                                             </div>
                                         </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-                                            <button type="submit" class="btn btn-primary">Enregistrer</button>
-                                        </div>
-                                    </form>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-                    </tr>
-                <?php endforeach; ?>
-                </tbody>
-            </table>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>

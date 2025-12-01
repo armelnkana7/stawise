@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Core\Database;
+use Dompdf\Dompdf;
 
 class ReportController extends Controller
 {
@@ -14,67 +15,122 @@ class ReportController extends Controller
     public function index()
     {
         $this->requireAuth();
-        $q = $_GET['q'] ?? null;
 
-        // Charger les rapports avec les infos liées
+        // Recherche sécurisée
+        $q = $_GET['q'] ?? null;
+        $qParam = $q ? "%{$q}%" : null;
+
+        // Récupération establishment & user depuis la session
+        $est = isset($_SESSION['establishment_id']) ? (int) $_SESSION['establishment_id'] : null;
+        $uid = isset($_SESSION['user_id']) ? (int) $_SESSION['user_id'] : null;
+        $did = isset($_SESSION['department_id']) ? (int) $_SESSION['department_id'] : null;
+
+        // Requête de base pour les rapports
         $sql = 'SELECT r.*, p.classe_id, p.subject_id, p.nbr_hours, p.nbr_lesson, p.nbr_lesson_dig, p.nbr_tp, p.nbr_tp_dig, 
-                   c.name as class_name, s.name as subject_name, u.full_name as recorded_by 
-            FROM weekly_coverage_reports r 
-            LEFT JOIN programs p ON r.program_id = p.id 
-            LEFT JOIN classes c ON p.classe_id = c.id 
-            LEFT JOIN subjects s ON p.subject_id = s.id 
+                   c.name AS class_name, s.name AS subject_name, u.full_name AS recorded_by
+            FROM weekly_coverage_reports r
+            LEFT JOIN programs p ON r.program_id = p.id
+            LEFT JOIN classes c ON p.classe_id = c.id
+            LEFT JOIN subjects s ON p.subject_id = s.id
             LEFT JOIN users u ON r.recorded_by_user_id = u.id';
-        $params = [];
-        // Apply role-based filters
+
         $where = [];
-        if ($q) {
+        $params = [];
+
+        // Search clause
+        if ($qParam) {
             $where[] = '(c.name LIKE :q OR s.name LIKE :q OR u.full_name LIKE :q)';
-            $params['q'] = "%$q%";
+            $params['q'] = $qParam;
         }
-        // If user can view all reports, no extra filter
+
+        // Role-based and establishment filtering
         if ($this->hasPermission('view_all_reports')) {
-            // no filter
-        } elseif ($this->hasPermission('view_establishment')) {
-            $eid = $_SESSION['establishment_id'] ?? null;
-            if ($eid) {
-                $where[] = 'c.establishment_id = :est';
-                $params['est'] = $eid;
+            // No global establishment filter
+
+            // If user cannot view all reports, restrict at least to their establishment (if available)
+            if ($est) {
+                $where[] = 'r.establishment_id = :est';
+                $params['est'] = $est;
             }
-        } elseif ($this->hasPermission('view_department_reports')) {
-            $did = $_SESSION['department_id'] ?? null;
+
+            if ($this->hasPermission('view_establishment')) {
+                // Already restricted by r.establishment_id above
+                // Nothing extra needed here
+            } elseif ($this->hasPermission('view_department_reports')) {
+                if ($did) {
+                    // limit to department for class or subject
+                    $where[] = '(c.department_id = :d OR s.department_id = :d)';
+                    $params['d'] = $did;
+                }
+            } else {
+                // default: only reports recorded by current user
+                if ($uid) {
+                    $where[] = 'r.recorded_by_user_id = :uid';
+                    $params['uid'] = $uid;
+                }
+            }
+        }
+
+        if ($this->hasPermission('view_department_reports')) {
             if ($did) {
+                // limit to department for class or subject
                 $where[] = '(c.department_id = :d OR s.department_id = :d)';
                 $params['d'] = $did;
-            }
-        } else {
-            // default: show only reports recorded by current user
-            $uid = $_SESSION['user_id'] ?? null;
-            if ($uid) {
-                $where[] = 'r.recorded_by_user_id = :uid';
-                $params['uid'] = $uid;
             }
         }
 
         if (count($where) > 0) {
             $sql .= ' WHERE ' . implode(' AND ', $where);
         }
+
         $sql .= ' ORDER BY r.created_at DESC';
+
         $reports = Database::query($sql, $params)->fetchAll(\PDO::FETCH_ASSOC);
 
         // Charger les programmes pour les modals (édition / création)
-        $programs = Database::query(
-            'SELECT p.*, c.name AS class_name, s.name AS subject_name 
-         FROM programs p 
-         JOIN classes c ON p.classe_id = c.id 
-         JOIN subjects s ON p.subject_id = s.id
-         ORDER BY c.name, s.name'
+        // On filtre les programmes par establishment si l'utilisateur n'a pas view_all_reports
+        $programParams = [];
+        $programSql = '
+        SELECT p.*, c.name AS class_name, s.name AS subject_name
+        FROM programs p
+        JOIN classes c ON p.classe_id = c.id
+        JOIN subjects s ON p.subject_id = s.id
+    ';
+
+        $departments = Database::query(
+            "SELECT id, name FROM departments WHERE establishment_id = :est",
+            ['est' => $_SESSION['establishment_id']]
         )->fetchAll(\PDO::FETCH_ASSOC);
+        // If user cannot view all reports, only give programs belonging to the same establishment
+
+        $programSql .= ' WHERE p.establishment_id = :p_est AND c.establishment_id = :p_est AND s.establishment_id = :p_est';
+
+        if ($this->hasPermission('view_department_reports')) {
+            if ($did) {
+                $programSql .= ' AND (c.department_id = :pd OR s.department_id = :pd)';
+                $programParams['pd'] = $did;
+
+                $departments = Database::query(
+                    "SELECT id, name FROM departments WHERE establishment_id = :est AND id = :pd",
+                    ['est' => $_SESSION['establishment_id'], 'pd' => $did]
+                )->fetchAll(\PDO::FETCH_ASSOC);
+            }
+        }
+        $programParams['p_est'] = $est;
+
+        $programSql .= ' ORDER BY c.name, s.name';
+
+        $programs = Database::query($programSql, $programParams)->fetchAll(\PDO::FETCH_ASSOC);
+
+
 
         return $this->view('pages/reports/index', [
-            'reports' => $reports,
-            'programs' => $programs
+            'reports'  => $reports,
+            'programs' => $programs,
+            'departments' => $departments,
         ]);
     }
+
 
     public function create()
     {
@@ -235,5 +291,80 @@ class ReportController extends Controller
         }
         fclose($out);
         exit;
+    }
+
+    public function generate()
+    {
+        $this->requireAuth();
+        $this->requirePermission('view_all_reports');
+        $this->validateCsrf();
+
+        $period = $_POST['period'] ?? null;
+        $department_id = intval($_POST['department_id'] ?? 0);
+        $report_type = $_POST['report_type'] ?? null;
+
+        if (!$period || !$department_id || !in_array($report_type, ['pdf', 'excel'])) {
+            set_flash('error', 'Paramètres invalides.');
+            redirect('reports');
+        }
+
+        // Query reports for the department and period (assuming period is start of week)
+        $sql = 'SELECT r.*, p.classe_id, p.subject_id, p.nbr_hours, p.nbr_lesson, p.nbr_lesson_dig, p.nbr_tp, p.nbr_tp_dig,
+                   c.name AS class_name, s.name AS subject_name, u.full_name AS recorded_by, d.name AS department_name
+            FROM weekly_coverage_reports r
+            LEFT JOIN programs p ON r.program_id = p.id
+            LEFT JOIN classes c ON p.classe_id = c.id
+            LEFT JOIN subjects s ON p.subject_id = s.id
+            LEFT JOIN users u ON r.recorded_by_user_id = u.id
+            LEFT JOIN departments d ON c.department_id = d.id
+            WHERE c.department_id = :dept AND DATE(r.created_at) >= :period
+            ORDER BY r.created_at DESC';
+
+        $params = ['dept' => $department_id, 'period' => $period];
+        $reports = Database::query($sql, $params)->fetchAll(\PDO::FETCH_ASSOC);
+
+        if ($report_type === 'pdf') {
+            ob_start();
+            include __DIR__ . '/../../views/reports/pdf_template.php';
+            $html = ob_get_clean();
+            $dompdf = new Dompdf();
+            $dompdf->loadHtml($html);
+            $dompdf->setPaper('A4', 'landscape');
+            $dompdf->render();
+            $dompdf->stream('report_' . $period . '.pdf');
+        } elseif ($report_type === 'excel') {
+            header('Content-Type: application/vnd.ms-excel');
+            header('Content-Disposition: attachment; filename="report_' . $period . '.xls"');
+            ob_start();
+            include __DIR__ . '/../../views/reports/excel_template.php';
+            $html = ob_get_clean();
+            echo $html;
+        }
+        exit;
+    }
+
+    private function generatePdfHtml($reports, $period, $department_id)
+    {
+        $html = '<h1>Rapport de Couverture Hebdomadaire</h1>';
+        $html .= '<p>Période: ' . $period . '</p>';
+        $html .= '<p>Département ID: ' . $department_id . '</p>';
+        $html .= '<table border="1" style="width:100%;">';
+        $html .= '<tr><th>ID</th><th>Classe</th><th>Matière</th><th>Heures Ftes</th><th>Leçons Ftes</th><th>Leçons Dig Ftes</th><th>TP Fts</th><th>TP Dig Fts</th><th>Date</th><th>Enregistré par</th></tr>';
+        foreach ($reports as $r) {
+            $html .= '<tr>';
+            $html .= '<td>' . $r['id'] . '</td>';
+            $html .= '<td>' . htmlspecialchars($r['class_name']) . '</td>';
+            $html .= '<td>' . htmlspecialchars($r['subject_name']) . '</td>';
+            $html .= '<td>' . $r['nbr_hours_do'] . '</td>';
+            $html .= '<td>' . $r['nbr_lesson_do'] . '</td>';
+            $html .= '<td>' . $r['nbr_lesson_dig_do'] . '</td>';
+            $html .= '<td>' . $r['nbr_tp_do'] . '</td>';
+            $html .= '<td>' . $r['nbr_tp_dig_do'] . '</td>';
+            $html .= '<td>' . $r['created_at'] . '</td>';
+            $html .= '<td>' . htmlspecialchars($r['recorded_by']) . '</td>';
+            $html .= '</tr>';
+        }
+        $html .= '</table>';
+        return $html;
     }
 }

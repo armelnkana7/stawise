@@ -13,7 +13,7 @@ use App\Controllers\RoleController;
 use App\Controllers\ReportController;
 use App\Controllers\ProgramController;
 
-$router->get('',[AuthController::class, 'showLoginForm']);
+$router->get('', [AuthController::class, 'showLoginForm']);
 $router->get('/', [AuthController::class, 'showLoginForm']);
 
 // Routes d'authentification
@@ -84,6 +84,8 @@ $router->post('reports/update', [ReportController::class, 'update']);
 $router->post('reports/delete', [ReportController::class, 'delete']);
 // Export
 $router->get('reports/export', [ReportController::class, 'export']);
+// Generate specific report
+$router->post('reports/generate', [ReportController::class, 'generate']);
 
 
 // Programs (class - subject planning)
@@ -111,4 +113,3 @@ $router->get('subjects/list', [App\Controllers\SubjectController::class, 'list']
 
 // Une fois connecté, on pourrait avoir un tableau de bord
 // $router->get('dashboard', 'DashboardController@index');
-

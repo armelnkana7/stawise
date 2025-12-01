@@ -199,7 +199,7 @@ require __DIR__ . '/../../layouts/header.php'; ?>
                             data-bs-target="#modalImportReports">Importer</button>
                         <button class="btn btn-sm btn-success ms-3 px-4 py-3" data-bs-toggle="modal"
                             data-bs-target="#modalReportCreate">Nouveau rapport</button>
-                        <button class="btn btn-sm btn-primary ms-3 px-4 py-3" data-bs-toggle="modal" data-bs-target="#modalRoleCreate">Nouveau rôle</button>
+                        <!-- <button class="btn btn-sm btn-primary ms-3 px-4 py-3" data-bs-toggle="modal" data-bs-target="#modalRoleCreate">Nouveau rôle</button> -->
 
                         <!-- Program create modal (small) -->
                         <div class="modal fade" id="modalReportCreate" tabindex="-1" aria-hidden="true">

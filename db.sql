@@ -121,7 +121,7 @@ INSERT INTO `establishments` (`id`, `name`, `code`, `address`, `phone`, `email`,
 DROP TABLE IF EXISTS `programs`;
 CREATE TABLE IF NOT EXISTS `programs` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `establishment_id` int NOT NULL,
+  `establishment_id` int NOT NULL DEFAULT 1,
   `classe_id` int NOT NULL,
   `subject_id` int NOT NULL,
   `nbr_hours` int NOT NULL,
@@ -159,7 +159,7 @@ CREATE TABLE IF NOT EXISTS `roles` (
 INSERT INTO `roles` (`id`, `name`, `description`, `created_at`) VALUES
 	(1, 'Admin', 'Administrateur avec toutes les permissions', '2025-11-29 15:20:10'),
 	(2, 'superadmin', 'Super administrateur avec accès à toutes les fonctionnalités', '2025-11-29 14:20:10'),
-	(3, 'censeur', 'Administrateur d\'un établissement; peut gérer tout concernant son établissement', '2025-11-29 14:21:00'),
+	(3, 'censeur', 'Administrateur d un établissement; peut gérer tout concernant son établissement', '2025-11-29 14:21:00'),
 	(4, 'chef_departement', 'Chef du département; peut consulter et remplir les rapports pour son département', '2025-11-29 14:21:10'),
 	(5, 'Lycée Technique', NULL, '2025-12-01 13:02:59');
 
@@ -239,7 +239,7 @@ INSERT INTO `users` (`id`, `establishment_id`, `role_id`, `department_id`, `full
 DROP TABLE IF EXISTS `weekly_coverage_reports`;
 CREATE TABLE IF NOT EXISTS `weekly_coverage_reports` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `establishment_id` int NOT NULL,
+  `establishment_id` int NOT NULL DEFAULT 1,
   `program_id` int NOT NULL,
   `recorded_by_user_id` int NOT NULL,
   `nbr_hours_do` int NOT NULL,

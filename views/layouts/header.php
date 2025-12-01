@@ -9,11 +9,11 @@
     <!-- Fonts -->
 
     <!-- jQuery -->
-<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 
-<!-- DataTables JS -->
-<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
 
 
     <link rel="canonical" href="https://preview.keenthemes.com/saul-html-free" />
@@ -26,6 +26,8 @@
     <link href="<?php echo url('theme/dist/assets/plugins/global/plugins.bundle.css'); ?>" rel="stylesheet"
         type="text/css" />
     <link href="<?php echo url('theme/dist/assets/css/style.bundle.css'); ?>" rel="stylesheet" type="text/css" />
+    <link href="<?php echo url('assets/plugins/global/plugins.bundle.css'); ?> " rel="stylesheet" type="text/css" />
+    <script src="<?php echo url('assets/plugins/global/plugins.bundle.js'); ?>"></script>
 </head>
 
 </head>
@@ -145,17 +147,17 @@
                                                 $roleId = $_SESSION['role_id'] ?? null;
                                                 $canSwitch = $roleId ? role_has_permission($roleId, 'switch_establishment') : false;
                                             ?>
-                                            <?php if ($canSwitch): ?>
-                                                <?php $ests = App\Core\Database::query('SELECT id, name FROM establishments ORDER BY name')->fetchAll(PDO::FETCH_ASSOC); ?>
-                                                <form method="POST" action="<?= url('establishments/switch') ?>" class="d-flex align-items-center ms-3">
-                                                    <?= csrf_field(); ?>
-                                                    <select name="establishment_id" class="form-select form-select-sm" onchange="this.form.submit()">
-                                                        <?php foreach ($ests as $e): ?>
-                                                            <option value="<?= $e['id'] ?>" <?= (isset($_SESSION['establishment_id']) && $_SESSION['establishment_id'] == $e['id']) ? 'selected' : '' ?>><?= htmlspecialchars($e['name']) ?></option>
-                                                        <?php endforeach; ?>
-                                                    </select>
-                                                </form>
-                                            <?php endif; ?>
+                                                <?php if ($canSwitch): ?>
+                                                    <?php $ests = App\Core\Database::query('SELECT id, name FROM establishments ORDER BY name')->fetchAll(PDO::FETCH_ASSOC); ?>
+                                                    <form method="POST" action="<?= url('establishments/switch') ?>" class="d-flex align-items-center ms-3">
+                                                        <?= csrf_field(); ?>
+                                                        <select name="establishment_id" class="form-select form-select-sm" onchange="this.form.submit()">
+                                                            <?php foreach ($ests as $e): ?>
+                                                                <option value="<?= $e['id'] ?>" <?= (isset($_SESSION['establishment_id']) && $_SESSION['establishment_id'] == $e['id']) ? 'selected' : '' ?>><?= htmlspecialchars($e['name']) ?></option>
+                                                            <?php endforeach; ?>
+                                                        </select>
+                                                    </form>
+                                                <?php endif; ?>
                                             <?php endif; ?>
                                             <!--end::Establishment switch -->
                                             <!--begin::Menu-->

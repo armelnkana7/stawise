@@ -14,6 +14,8 @@ return [
         'manage_subjects' => true,
         'manage_classes' => true,
         'manage_programs' => true,
+        'manage_reports' => true,
+        'record_reports' => true,
     ],
     'censeur' => [
         'manage_users' => true,
@@ -23,6 +25,8 @@ return [
         'manage_subjects' => true,
         'manage_classes' => true,
         'view_establishment' => true,
+        'record_reports' => true,
+        'view_all_reports' => true,
     ],
     'chef_departement' => [
         'record_reports' => true,

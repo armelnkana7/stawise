@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Controllers;
 
 use App\Core\Database;
@@ -27,7 +28,7 @@ class UserController extends Controller
             $users = $stmt->fetchAll(\PDO::FETCH_ASSOC);
         }
         $roles = Database::query('SELECT * FROM roles')->fetchAll(\PDO::FETCH_ASSOC);
-        $depts = Database::query('SELECT * FROM departments')->fetchAll(\PDO::FETCH_ASSOC);
+        $depts = Database::query('SELECT * FROM departments WHERE establishment_id = :e', ['e' => $_SESSION['establishment_id'] ?? null])->fetchAll(\PDO::FETCH_ASSOC);
         $ests = Database::query('SELECT * FROM establishments')->fetchAll(\PDO::FETCH_ASSOC);
         return $this->view('pages/users/index', ['users' => $users, 'roles' => $roles, 'depts' => $depts, 'ests' => $ests]);
     }
