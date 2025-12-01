@@ -1,0 +1,324 @@
+﻿<!DOCTYPE html>
+<html lang="fr">
+<!--begin::Head-->
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Connexion - StatWise</title>
+    <!-- Fonts -->
+
+    <!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+
+<!-- DataTables JS -->
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+
+
+    <link rel="canonical" href="https://preview.keenthemes.com/saul-html-free" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700" />
+    <link href="assets/plugins/global/plugins.bundle.css" rel="stylesheet" type="text/css" />
+    <script src="assets/plugins/global/plugins.bundle.js"></script>
+    <link href="/\/theme/dist/assets/plugins/custom/datatables/datatables.bundle.css"
+        rel="stylesheet" type="text/css" />
+    <!-- Global styles -->
+    <link href="/\/theme/dist/assets/plugins/global/plugins.bundle.css" rel="stylesheet"
+        type="text/css" />
+    <link href="/\/theme/dist/assets/css/style.bundle.css" rel="stylesheet" type="text/css" />
+</head>
+
+</head>
+<!--end::Head-->
+<!--begin::Body-->
+
+    <body id="kt_body" class="app-blank">
+        <div class="d-flex flex-column flex-root" id="kt_app_root">
+        
+<div class="d-flex flex-column flex-root" id="kt_app_root">
+    <!--begin::Authentication - Sign-in -->
+    <div class="d-flex flex-column flex-lg-row flex-column-fluid">
+        <!--begin::Aside-->
+        <div class="d-flex flex-column flex-lg-row-auto bg-primary w-xl-600px positon-xl-relative">
+            <!--begin::Wrapper-->
+            <div class="d-flex flex-column position-xl-fixed top-0 bottom-0 w-xl-600px scroll-y">
+                <!--begin::Header-->
+                <div class="d-flex flex-row-fluid flex-column text-center p-5 p-lg-10 pt-lg-20">
+                    <!--begin::Logo-->
+                    <a href="/\" class="py-2 py-lg-20">
+                        <img alt="Logo" src="/\/theme/dist/assets/media/logos/statwise2.png" class="h-40px h-lg-50px" />
+                    </a>
+                    <!--end::Logo-->
+                    <!--begin::Title-->
+                    <h1 class="d-none d-lg-block fw-bold text-white fs-2qx pb-5 pb-md-10">Bienvenue sur StatWise</h1>
+                    <!--end::Title-->
+                    <!--begin::Description-->
+                    <p class="d-none d-lg-block fw-semibold fs-2 text-white">Gestion et rapports pédagogiques faciles</p>
+                    <!--end::Description-->
+                </div>
+                <!--end::Header-->
+                <!--begin::Illustration-->
+                <div class="d-none d-lg-block d-flex flex-row-auto bgi-no-repeat bgi-position-x-center bgi-size-contain bgi-position-y-bottom min-h-100px min-h-lg-350px" style="background-image: url(/\/theme/dist/assets/media/illustrations/sketchy-1/17.png)"></div>
+                <!--end::Illustration-->
+            </div>
+            <!--end::Wrapper-->
+        </div>
+        <!--begin::Body-->
+        <div class="d-flex flex-column flex-lg-row-fluid py-10">
+            <!--begin::Content-->
+            <div class="d-flex flex-center flex-column flex-column-fluid">
+                <!--begin::Wrapper-->
+                <div class="w-lg-500px p-10 p-lg-15 mx-auto">
+                    <!--begin::Form-->
+                    <form class="form w-100" novalidate="novalidate" id="kt_sign_in_form" method="POST" action="/\/login">
+                        <!--begin::Heading-->
+                        <div class="text-center mb-10">
+                            <!--begin::Title-->
+                            <h1 class="text-dark mb-3">Connexion à StatWise</h1>
+                            <!--end::Title-->
+                            <!--begin::Link-->
+                            <div class="text-gray-400 fw-semibold fs-4">Nouveau ici?
+                            <a href="#" class="link-primary fw-bold">Créer un compte</a></div>
+                            <!--end::Link-->
+                        </div>
+                        <!--begin::Input group-->
+                        <div class="fv-row mb-10">
+                            <label class="form-label fs-6 fw-bold text-dark">Email</label>
+                            <input class="form-control form-control-lg form-control-solid" type="text" name="email" autocomplete="off" />
+                        </div>
+                        <!--begin::Input group-->
+                        <div class="fv-row mb-10">
+                            <div class="d-flex flex-stack mb-2">
+                                <label class="form-label fw-bold text-dark fs-6 mb-0">Mot de passe</label>
+                                <a href="#" class="link-primary fs-6 fw-bold">Mot de passe oublié ?</a>
+                            </div>
+                            <input class="form-control form-control-lg form-control-solid" type="password" name="password" autocomplete="off" />
+                        </div>
+                        <!--begin::Actions-->
+                        <div class="text-center">
+                            <button type="submit" id="kt_sign_in_submit2" class="btn btn-lg btn-primary w-100 mb-5">
+                                <span class="indicator-label">Continuer</span>
+                                <span class="indicator-progress">Veuillez patienter...
+                                <span class="spinner-border spinner-border-sm align-middle ms-2"></span></span>
+                            </button>
+                        </div>
+                        <!--end::Actions-->
+                    </form>
+                    <!--end::Form-->
+                </div>
+                <!--end::Wrapper-->
+            </div>
+            <!--end::Content-->
+            <!--begin::Footer-->
+            <div class="d-flex flex-center flex-wrap fs-6 p-5 pb-0">
+                <!--begin::Links-->
+                <div class="d-flex flex-center fw-semibold fs-6">
+                    <a href="https://keenthemes.com" class="text-muted text-hover-primary px-2" target="_blank">About</a>
+                    <a href="https://devs.keenthemes.com" class="text-muted text-hover-primary px-2" target="_blank">Support</a>
+                    <a href="https://keenthemes.com/products/saul-html-pro" class="text-muted text-hover-primary px-2" target="_blank">Purchase</a>
+                </div>
+                <!--end::Links-->
+            </div>
+            <!--end::Footer-->
+        </div>
+        <!--end::Body-->
+    </div>
+    <!--end::Authentication - Sign-in-->
+</div>
+
+    <!-- Auth footer -->
+    <div class="d-flex flex-center flex-wrap fs-6 p-5 pb-0">
+        <div class="d-flex flex-center fw-semibold fs-6">
+            <a href="https://keenthemes.com" class="text-muted text-hover-primary px-2" target="_blank">About</a>
+            <a href="https://devs.keenthemes.com" class="text-muted text-hover-primary px-2" target="_blank">Support</a>
+        </div>
+    </div>
+    <!-- Javascript -->
+    <script>var hostUrl = "/\/theme/dist/assets";</script>
+    <script src="/\/theme/dist/assets/plugins/global/plugins.bundle.js"></script>
+    <script src="/\/theme/dist/assets/js/scripts.bundle.js"></script>
+    <script src="/\/theme/dist/assets/js/custom/authentication/sign-in/general.js"></script>
+    </body>
+
+    </html>
+<script>
+    // Show flash messages using toastr if available
+    (function () {
+        var f = window.__flash || {};
+        try {
+            if (typeof toastr !== 'undefined') {
+                Object.keys(f).forEach(function (k) {
+                    var msg = f[k];
+                    if (!msg) return;
+                    if (k === 'success') toastr.success(msg);
+                    else toastr.error(msg);
+                });
+            } else {
+                // fallback: log
+                Object.keys(f).forEach(function (k) { if (f[k]) console.log(k + ': ' + f[k]); });
+            }
+        } catch (e) { console.error('toastr display failed', e); }
+    })();
+</script>
+<script>
+    // Initialize Select2 for enhanced selects if plugin present
+    (function () {
+        try {
+            if (typeof $ !== 'undefined' && typeof $.fn !== 'undefined' && typeof $.fn.select2 !== 'undefined') {
+                document.querySelectorAll('.select2').forEach(function (el) {
+                    if (!$(el).data('select2')) {
+                        $(el).select2({ width: '100%' });
+                    }
+                });
+            }
+        } catch (e) { console.error('Select2 init failed', e); }
+    })();
+</script>
+
+<script>
+    $(document).ready(function () {
+        // Generic: initialize a datatable per card (if any) and bind its local filters
+        $('.card').each(function () {
+            var card = $(this);
+            var tableEl = card.find('table').first();
+            if (!tableEl || tableEl.length === 0) return;
+            var dt = tableEl.DataTable({
+                "paging": true,
+                "ordering": true,
+                "info": true,
+                "lengthChange": false,
+                "pageLength": 10,
+            });
+
+            // search input within this card
+            card.find('input[data-kt-customer-table-filter="search"]').on('keyup', function () {
+                dt.search(this.value).draw();
+            });
+
+            // Month select filter in card
+            card.find('select[data-kt-customer-table-filter="month"]').on('change', function () {
+                var val = $(this).val();
+                if (val) {
+                    // We try to search in the whole table or a logical column; fallback to global search
+                    dt.search(val, true, false).draw();
+                } else {
+                    dt.search('').draw();
+                }
+            });
+
+            // Payment type filter (radio) within card
+            card.find('input[name="payment_type"]').on('change', function () {
+                var val = $(this).val();
+                if (val === 'all') {
+                    dt.search('').draw();
+                } else {
+                    dt.search(val, true, false).draw();
+                }
+            });
+
+            // Reset filters within this card
+            card.find('[data-kt-customer-table-filter="reset"]').on('click', function () {
+                dt.search('').columns().search('').draw();
+                card.find('input[name="payment_type"][value="all"]').prop('checked', true);
+                card.find('select[data-kt-customer-table-filter="month"]').val('').trigger('change');
+            });
+        });
+    });
+
+</script>
+<!-- Global confirm delete modal -->
+<div class="modal fade" id="modalConfirmDelete" tabindex="-1" aria-labelledby="modalConfirmDeleteLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <form id="modalDeleteForm" method="POST" action="">
+                <input type="hidden" name="_csrf" value="8282c87b927299c0fb2f9c3de69835bffc7c78d201a83253ba35065a458dd700" />                <div class="modal-header">
+                    <h5 class="modal-title" id="modalConfirmDeleteLabel">Confirmer la suppression</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="modalDeleteMessage">Voulez-vous supprimer cet élément ?</p>
+                    <input type="hidden" name="id" id="modalDeleteId" value="" />
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-danger" id="modalConfirmDeleteBtn">Supprimer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+    (function(){
+        // When a .btn-open-delete-modal is clicked, populate modal form and show
+        document.addEventListener('click', function(e){
+            const el = e.target.closest('.btn-open-delete-modal');
+            if (!el) return;
+            e.preventDefault();
+            const action = el.dataset.action || el.getAttribute('data-action');
+            const id = el.dataset.id || el.getAttribute('data-id');
+            const name = el.dataset.name || el.getAttribute('data-name') || '';
+            const message = name ? ('Voulez-vous supprimer "' + name + '" ?') : 'Voulez-vous supprimer cet élément ?';
+            const modal = document.getElementById('modalConfirmDelete');
+            const form = document.getElementById('modalDeleteForm');
+            const idInput = document.getElementById('modalDeleteId');
+            const msg = document.getElementById('modalDeleteMessage');
+            if (form) form.setAttribute('action', action);
+            if (idInput) idInput.value = id || '';
+            if (msg) msg.textContent = message;
+            var bs = bootstrap.Modal.getInstance(modal) || new bootstrap.Modal(modal);
+            bs.show();
+        });
+    })();
+    // Generic edit button handler for subjects (and others) using data-* attributes
+    (function(){
+        document.addEventListener('click', function(e){
+            var el = e.target.closest('.btn-edit-subject');
+            if (!el) return;
+            e.preventDefault();
+            var id = el.dataset.id || '';
+            var name = el.dataset.name || '';
+            var code = el.dataset.code || '';
+            var desc = el.dataset.desc || '';
+            var est = el.dataset.establishmentId || el.dataset.establishmentId || '';
+            var dept = el.dataset.departmentId || el.dataset.departmentId || '';
+            var modal = document.getElementById('modalSubjectEdit');
+            if (!modal) return;
+            document.getElementById('edit_subject_id').value = id;
+            document.getElementById('edit_subject_name').value = name;
+            document.getElementById('edit_subject_code').value = code;
+            document.getElementById('edit_subject_description').value = desc;
+            if (est) { $('#edit_subject_est').val(est).trigger('change'); } else { $('#edit_subject_est').val('').trigger('change'); }
+            if (dept) { $('#edit_subject_dept').val(dept).trigger('change'); } else { $('#edit_subject_dept').val('').trigger('change'); }
+            var bs = bootstrap.Modal.getInstance(modal) || new bootstrap.Modal(modal);
+            bs.show();
+        });
+    })();
+</script>
+<script>
+    // Update role description text for create/edit role selects
+    (function(){
+        // On page load, set create role description if present
+        var createSel = document.getElementById('create_user_role');
+        if (createSel) {
+            var descEl = document.getElementById('createRoleDesc');
+            var selectedDesc = createSel.selectedOptions && createSel.selectedOptions[0] ? createSel.selectedOptions[0].dataset.desc : '';
+            if (descEl) descEl.textContent = selectedDesc || '';
+            createSel.addEventListener('change', function(e){
+                var d = e.target.selectedOptions && e.target.selectedOptions[0] ? e.target.selectedOptions[0].dataset.desc : '';
+                if (descEl) descEl.textContent = d || '';
+            });
+        }
+
+        // For any edit role selects, use delegated change handler
+        document.addEventListener('change', function(e){
+            var el = e.target;
+            if(!el) return;
+            if (el.id && el.id.indexOf('edit_role_select_') === 0) {
+                var id = el.id.split('_').pop();
+                var desc = el.selectedOptions && el.selectedOptions[0] ? el.selectedOptions[0].dataset.desc : '';
+                var dest = document.getElementById('editRoleDesc_' + id);
+                if (dest) dest.textContent = desc || '';
+            }
+        });
+    })();
+</script>
