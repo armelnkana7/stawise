@@ -35,8 +35,7 @@ tmp/
 temp/
 .tmp/
 
-# Build and dist
-dist/
+# Build
 build/
 
 # Testing
