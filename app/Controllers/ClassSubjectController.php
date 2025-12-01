@@ -11,60 +11,88 @@ class ClassSubjectController extends Controller
         $this->requireAuth();
 
         try {
-            $classId = $_GET['id'] ?? null;
+            $classId = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
             if (!$classId) {
                 set_flash('error', 'Classe non spécifiée.');
                 redirect('classes');
             }
 
-            $class = Database::query('SELECT * FROM classes WHERE id = :id', ['id' => $classId])
-                ->fetch(\PDO::FETCH_ASSOC);
-            if (!$class) {
-                set_flash('error', 'Classe introuvable.');
+            // établissement actif dans la session
+            $est = $_SESSION['establishment_id'] ?? null;
+            if (! $est) {
+                set_flash('error', "Aucun établissement actif.");
+                redirect('dashboard');
+            }
+
+            // Vérifier que la classe existe et appartient à l'établissement
+            $stmt = Database::query('SELECT * FROM classes WHERE id = :id AND establishment_id = :est LIMIT 1', [
+                'id'  => $classId,
+                'est' => $est,
+            ]);
+            $class = $stmt->fetch(\PDO::FETCH_ASSOC);
+            if (! $class) {
+                set_flash('error', 'Classe introuvable ou non autorisée pour cet établissement.');
                 redirect('classes');
             }
 
-            // die(print_r($class, true));
+            // Récupérer les programmes assignés (uniquement pour la même établissement et la classe donnée)
+            $assignedStmt = Database::query(
+                'SELECT p.*, s.name AS subject_name 
+             FROM programs p
+             JOIN subjects s ON p.subject_id = s.id
+             WHERE p.classe_id = :class_id
+               AND p.establishment_id = :est
+               AND s.establishment_id = :est',
+                [
+                    'class_id' => $classId,
+                    'est'      => $est,
+                ]
+            );
+            $assigned = $assignedStmt->fetchAll(\PDO::FETCH_ASSOC);
 
-            $est = $_SESSION['establishment_id'] ?? null;
+            // Extraire les subject_id déjà assignés
+            $assignedIds = array_column($assigned, 'subject_id');
 
-            $assigned = Database::query(
-                'SELECT p.*, s.name as subject_name 
-                 FROM programs p 
-                 JOIN subjects s ON p.subject_id = s.id 
-                 WHERE p.classe_id = :class',
-                ['class' => $classId]
-            )->fetchAll(\PDO::FETCH_ASSOC);
-
-            $assignedIds = array_column($assigned, 'subject_id'); // récupère les IDs déjà assignés
-
-            $placeholders = implode(',', array_fill(0, count($assignedIds), '?'));
-            // die(print_r($placeholders, true));
+            // Récupérer les subjects de l'établissement NON assignés à cette classe
             if (empty($assignedIds)) {
-                $placeholders = '0'; // Pour éviter une erreur SQL si aucun sujet n'est assigné
-            }
-            $subjects = Database::query(
-                "SELECT * FROM subjects WHERE establishment_id = ? AND id NOT IN ($placeholders)",
-                array_merge([$est], $assignedIds)
-            )->fetchAll(\PDO::FETCH_ASSOC);
+                // Aucun sujet assigné -> on prend tous les sujets de l'établissement
+                $subjectsStmt = Database::query(
+                    'SELECT * FROM subjects WHERE establishment_id = :est',
+                    ['est' => $est]
+                );
+                $subjects = $subjectsStmt->fetchAll(\PDO::FETCH_ASSOC);
+            } else {
+                // Construire des placeholders sécurisés pour les ids assignés
+                $placeholders = implode(',', array_fill(0, count($assignedIds), '?'));
+                // Préparer les paramètres : establishment_id en premier, puis les assignedIds pour le NOT IN
+                $params = array_merge([$est], $assignedIds);
 
-            $subjects2 = Database::query(
+                $subjectsStmt = Database::query(
+                    "SELECT * FROM subjects WHERE establishment_id = ? AND id NOT IN ($placeholders)",
+                    $params
+                );
+                $subjects = $subjectsStmt->fetchAll(\PDO::FETCH_ASSOC);
+            }
+
+            // Pour affichage global (tous les sujets de l'établissement) si besoin
+            $subjectsAllStmt = Database::query(
                 'SELECT * FROM subjects WHERE establishment_id = :est',
                 ['est' => $est]
-            )->fetchAll(\PDO::FETCH_ASSOC);
-
-
+            );
+            $subjects2 = $subjectsAllStmt->fetchAll(\PDO::FETCH_ASSOC);
 
             return $this->view('pages/classes/subjects', [
-                'class' => $class,
-                'subjects' => $subjects,
+                'class'     => $class,
+                'subjects'  => $subjects,
                 'subjects2' => $subjects2,
-                'assigned' => $assigned
+                'assigned'  => $assigned,
             ]);
         } catch (\Throwable $th) {
+            // En dev vous pouvez logger $th->getMessage() puis rethrow ou afficher une page d'erreur
             throw $th;
         }
     }
+
 
     public function store()
     {
@@ -80,6 +108,7 @@ class ClassSubjectController extends Controller
             'nbr_tp' => intval($_POST['nbr_tp'] ?? 0),
             'nbr_lesson_dig' => intval($_POST['nbr_lesson_dig'] ?? 0),
             'nbr_tp_dig' => intval($_POST['nbr_tp_dig'] ?? 0),
+            'establishment_id' => $_SESSION['establishment_id'] ?? null,
         ];
 
         // Champs obligatoires
@@ -114,9 +143,9 @@ class ClassSubjectController extends Controller
         }
         Database::query(
             'INSERT INTO programs 
-            (classe_id, subject_id, nbr_hours, nbr_lesson, nbr_tp, nbr_lesson_dig, nbr_tp_dig)
+            (classe_id, subject_id, nbr_hours, nbr_lesson, nbr_tp, nbr_lesson_dig, nbr_tp_dig, establishment_id)
          VALUES 
-            (:classe_id, :subject_id, :nbr_hours, :nbr_lesson, :nbr_tp, :nbr_lesson_dig, :nbr_tp_dig)',
+            (:classe_id, :subject_id, :nbr_hours, :nbr_lesson, :nbr_tp, :nbr_lesson_dig, :nbr_tp_dig, :establishment_id)',
             $data
         );
 

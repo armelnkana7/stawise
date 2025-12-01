@@ -359,7 +359,7 @@ require __DIR__ . '/../../layouts/header.php'; ?>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Classe</label>
                                 <select name="classe_id" class="form-control">
-                                    <?php foreach (\App\Core\Database::query('SELECT id, name FROM classes')->fetchAll(\PDO::FETCH_ASSOC) as $c): ?>
+                                    <?php foreach (\App\Core\Database::query('SELECT id, name FROM classes WHERE establishment_id = :establishment_id', ['establishment_id' => $_SESSION['establishment_id'] ?? 0])->fetchAll(\PDO::FETCH_ASSOC) as $c): ?>
                                         <option value="<?php echo $c['id']; ?>"><?php echo htmlspecialchars($c['name']); ?>
                                         </option>
                                     <?php endforeach; ?>
@@ -368,7 +368,7 @@ require __DIR__ . '/../../layouts/header.php'; ?>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Matière</label>
                                 <select name="subject_id" class="form-control">
-                                    <?php foreach (\App\Core\Database::query('SELECT id, name FROM subjects')->fetchAll(\PDO::FETCH_ASSOC) as $s): ?>
+                                    <?php foreach (\App\Core\Database::query('SELECT id, name FROM subjects WHERE establishment_id = :establishment_id', ['establishment_id' => $_SESSION['establishment_id'] ?? 0])->fetchAll(\PDO::FETCH_ASSOC) as $s): ?>
                                         <option value="<?php echo $s['id']; ?>"><?php echo htmlspecialchars($s['name']); ?>
                                         </option>
                                     <?php endforeach; ?>
@@ -464,9 +464,9 @@ require __DIR__ . '/../../layouts/header.php'; ?>
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        document.querySelectorAll('.btn-program-edit').forEach(function (btn) {
-            btn.addEventListener('click', function () {
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.btn-program-edit').forEach(function(btn) {
+            btn.addEventListener('click', function() {
                 const id = this.dataset.id;
                 document.getElementById('program_edit_id').value = id;
                 document.getElementById('program_edit_classe_id').value = this.dataset.classeId;
@@ -488,7 +488,7 @@ require __DIR__ . '/../../layouts/header.php'; ?>
             if (!sel) return;
             const cur = sel.value;
             sel.innerHTML = '';
-            data.forEach(function (p) {
+            data.forEach(function(p) {
                 const o = document.createElement('option');
                 o.value = p.id;
                 o.text = (p.class_name || 'Classe') + ' - ' + (p.subject_name || 'Matière');

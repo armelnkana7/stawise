@@ -18,20 +18,16 @@ class DepartmentController extends Controller
 
         // Charger les départements + nom établissement
         $depts = Database::query(
-            "SELECT d.*, e.name as est_name 
-             FROM departments d 
-             LEFT JOIN establishments e ON d.establishment_id = e.id"
+            "SELECT * FROM departments WHERE establishment_id = :est",
+            ['est' => $_SESSION['establishment_id']]
         )->fetchAll(\PDO::FETCH_ASSOC);
 
         // Charger la liste des établissements pour le modal Edit
         $ests = Database::query('SELECT id, name FROM establishments')->fetchAll(\PDO::FETCH_ASSOC);
         // Charger les matières pour l'établissement en session
         $estSession = $_SESSION['establishment_id'] ?? null;
-        if ($estSession) {
-            $subjects = Database::query('SELECT id, name, department_id FROM subjects WHERE establishment_id = :est', ['est' => $estSession])->fetchAll(\PDO::FETCH_ASSOC);
-        } else {
-            $subjects = Database::query('SELECT id, name, department_id FROM subjects')->fetchAll(\PDO::FETCH_ASSOC);
-        }
+        $subjects = Database::query('SELECT id, name, department_id FROM subjects WHERE establishment_id = :est', ['est' => $estSession])->fetchAll(\PDO::FETCH_ASSOC);
+
         $subjects_unassigned = Database::query('SELECT id, name, department_id FROM subjects WHERE department_id IS NULL')->fetchAll(\PDO::FETCH_ASSOC);
 
         return $this->view('pages/departments/index', [

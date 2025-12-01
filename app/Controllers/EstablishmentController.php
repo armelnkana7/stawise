@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use App\Models\User;
 use App\Core\Database;
 
 class EstablishmentController extends Controller
@@ -85,22 +86,53 @@ class EstablishmentController extends Controller
      */
     public function switch()
     {
+        // Auth & permissions (vous avez déjà ces helpers)
         $this->requireAuth();
         $this->requirePermission('switch_establishment');
         $this->validateCsrf();
-        $id = $_POST['establishment_id'] ?? null;
-        if (!$id) {
-            redirect('dashboard');
+
+        // Démarrer la session si elle n'est pas déjà démarrée
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            session_start();
         }
-        // validate existence
-        $stmt = Database::query('SELECT id FROM establishments WHERE id = :id', ['id' => $id]);
-        if (!$stmt->fetch()) {
-            set_flash('error', 'Etablissement invalide.');
-            redirect('dashboard');
+
+        // Récupérer et valider l'ID (utilisation de filter_input pour sécurité)
+        $id = filter_input(INPUT_POST, 'establishment_id', FILTER_VALIDATE_INT);
+        if (! $id) {
+            set_flash('error', 'Identifiant d\'établissement manquant ou invalide.');
+            return redirect('dashboard');
         }
-        $_SESSION['establishment_id'] = (int)$id;
-        set_flash('success', 'Etablissement actif changé.');
-        // back to referring page
+
+        // Vérifier l'existence de l'établissement (préparé)
+        $stmt = Database::query('SELECT id FROM establishments WHERE id = :id LIMIT 1', ['id' => $id]);
+        $found = $stmt->fetch();
+        if (! $found) {
+            set_flash('error', 'Établissement invalide.');
+            return redirect('dashboard');
+        }
+
+        // Changer l'établissement actif dans la session
+        // (int cast pour sécurité)
+        $_SESSION['establishment_id'] = (int) $id;
+
+
+        $sql = 'UPDATE users SET establishment_id = :establishment_id WHERE email = :email';
+        $stmt = Database::query($sql, [
+            'email' => $_SESSION['email'],
+            'establishment_id' => $_SESSION['establishment_id']
+        ]);
+
+
+        // (Optionnel mais recommandé) régénérer l'id de session pour éviter fixation
+        // Note: regenération uniquement si PHP >= 5.1.0 (présent partout maintenant)
+        session_regenerate_id(true);
+
+        // S'assurer que PHP écrit la session avant le redirect
+        session_write_close();
+
+        // message de confirmation puis redirection vers la page précédente ou dashboard
+        set_flash('success', 'Établissement actif changé.');
+
         $back = $_SERVER['HTTP_REFERER'] ?? url('dashboard');
         header('Location: ' . $back);
         exit;

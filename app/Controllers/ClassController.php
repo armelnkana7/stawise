@@ -6,6 +6,13 @@ use App\Core\Database;
 
 class ClassController extends Controller
 {
+    public function __construct()
+    {
+        // Only users with 'manage_classes' permission can access ClassController actions
+        $this->requireAuth();
+        $this->requirePermission('manage_classes');
+    }
+
     public function index()
     {
         $this->requireAuth();

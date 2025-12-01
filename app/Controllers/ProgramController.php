@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Controllers;
 
 use App\Core\Database;
@@ -8,15 +9,49 @@ class ProgramController extends Controller
     public function index()
     {
         $this->requireAuth();
-        $q = $_GET['q'] ?? null;
-        if ($q) {
-            $stmt = Database::query('SELECT p.*, c.name as class_name, s.name as subject_name FROM programs p JOIN classes c ON p.classe_id = c.id JOIN subjects s ON p.subject_id = s.id WHERE c.name LIKE :q OR s.name LIKE :q', ['q' => "%$q%"]);
-        } else {
-            $stmt = Database::query('SELECT p.*, c.name as class_name, s.name as subject_name FROM programs p JOIN classes c ON p.classe_id = c.id JOIN subjects s ON p.subject_id = s.id');
+
+        $establishmentId = $_SESSION['establishment_id'] ?? null;
+
+        if (!$establishmentId) {
+            set_flash('error', "Aucun établissement actif.");
+            redirect('dashboard');
         }
+
+        $q = $_GET['q'] ?? null;
+
+        // Requête de base : tout doit appartenir au même établissement
+        $baseQuery = '
+        SELECT 
+            p.*, 
+            c.name AS class_name, 
+            s.name AS subject_name
+        FROM programs p
+        JOIN classes c ON p.classe_id = c.id 
+            AND c.establishment_id = :establishment_id
+        JOIN subjects s ON p.subject_id = s.id 
+            AND s.establishment_id = :establishment_id
+        WHERE p.establishment_id = :establishment_id
+    ';
+
+        $params = [
+            'establishment_id' => $establishmentId
+        ];
+
+        // Recherche (optionnelle)
+        if ($q) {
+            $baseQuery .= ' AND (c.name LIKE :q OR s.name LIKE :q)';
+            $params['q'] = "%$q%";
+        }
+
+        $stmt = Database::query($baseQuery, $params);
         $programs = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-        return $this->view('pages/programs/index', ['programs' => $programs]);
+
+        return $this->view('pages/programs/index', [
+            'programs' => $programs
+        ]);
     }
+
+
 
     // Return JSON list of programs (used for AJAX refresh)
     public function list()
