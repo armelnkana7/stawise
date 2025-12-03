@@ -54,6 +54,7 @@ $router->get('classes/create', [ClassController::class, 'create']);
 $router->post('classes', [ClassController::class, 'store']);
 $router->post('classes/update', [ClassController::class, 'update']);
 $router->post('classes/delete', [ClassController::class, 'delete']);
+
 // Class subjects (matières par classe)
 $router->get('classes/subjects', [App\Controllers\ClassSubjectController::class, 'index']);
 $router->post('classes/subjects', [App\Controllers\ClassSubjectController::class, 'store']);
@@ -77,11 +78,14 @@ $router->post('roles', [RoleController::class, 'store']);
 
 // Reports (weekly coverage)
 $router->get('reports', [ReportController::class, 'index']);
+$router->get('reports/consult', [ReportController::class, 'consult']);
+$router->get('reports/view', [ReportController::class, 'consult']);
 $router->get('reports/create', [ReportController::class, 'create']);
 $router->post('reports', [ReportController::class, 'store']);
 $router->get('reports/edit', [ReportController::class, 'edit']);
 $router->post('reports/update', [ReportController::class, 'update']);
 $router->post('reports/delete', [ReportController::class, 'delete']);
+
 // Export
 $router->get('reports/export', [ReportController::class, 'export']);
 // Generate specific report

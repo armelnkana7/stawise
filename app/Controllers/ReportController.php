@@ -125,12 +125,159 @@ class ReportController extends Controller
 
 
         return $this->view('pages/reports/index', [
-            'reports'  => $reports,
+            'reports' => $reports,
             'programs' => $programs,
             'departments' => $departments,
         ]);
     }
 
+    public function consult()
+    {
+        $this->requireAuth();
+
+        // Recherche sécurisée
+        $q = $_GET['q'] ?? null;
+        $qParam = $q ? "%{$q}%" : null;
+
+        // Récupération establishment & user depuis la session
+        $est = isset($_SESSION['establishment_id']) ? (int) $_SESSION['establishment_id'] : null;
+        $uid = isset($_SESSION['user_id']) ? (int) $_SESSION['user_id'] : null;
+        $did = isset($_SESSION['department_id']) ? (int) $_SESSION['department_id'] : null;
+
+        // Requête de base pour les rapports
+        $sql = 'SELECT r.*, p.classe_id, p.subject_id, p.nbr_hours, p.nbr_lesson, p.nbr_lesson_dig, p.nbr_tp, p.nbr_tp_dig, 
+                   c.name AS class_name, s.name AS subject_name, u.full_name AS recorded_by
+            FROM weekly_coverage_reports r
+            LEFT JOIN programs p ON r.program_id = p.id
+            LEFT JOIN classes c ON p.classe_id = c.id
+            LEFT JOIN subjects s ON p.subject_id = s.id
+            LEFT JOIN users u ON r.recorded_by_user_id = u.id';
+
+        $where = [];
+        $params = [];
+
+        // Search clause
+        if ($qParam) {
+            $where[] = '(c.name LIKE :q OR s.name LIKE :q OR u.full_name LIKE :q)';
+            $params['q'] = $qParam;
+        }
+
+        // Role-based and establishment filtering
+        if ($this->hasPermission('view_all_reports')) {
+            // No global establishment filter
+
+            // If user cannot view all reports, restrict at least to their establishment (if available)
+            if ($est) {
+                $where[] = 'r.establishment_id = :est';
+                $params['est'] = $est;
+            }
+
+            if ($this->hasPermission('view_establishment')) {
+                // Already restricted by r.establishment_id above
+                // Nothing extra needed here
+            } elseif ($this->hasPermission('view_department_reports')) {
+                if ($did) {
+                    // limit to department for class or subject
+                    $where[] = '(c.department_id = :d OR s.department_id = :d)';
+                    $params['d'] = $did;
+                }
+            } else {
+                // default: only reports recorded by current user
+                if ($uid) {
+                    $where[] = 'r.recorded_by_user_id = :uid';
+                    $params['uid'] = $uid;
+                }
+            }
+        }
+
+        if ($this->hasPermission('view_department_reports')) {
+            if ($did) {
+                // limit to department for class or subject
+                $where[] = '(c.department_id = :d OR s.department_id = :d)';
+                $params['d'] = $did;
+            }
+        }
+
+        if (count($where) > 0) {
+            $sql .= ' WHERE ' . implode(' AND ', $where);
+        }
+
+        $sql .= ' ORDER BY r.created_at DESC';
+
+        $reports = Database::query($sql, $params)->fetchAll(\PDO::FETCH_ASSOC);
+
+        // Charger les programmes pour les modals (édition / création)
+        // On filtre les programmes par establishment si l'utilisateur n'a pas view_all_reports
+        $programParams = [];
+        $programSql = '
+        SELECT p.*, c.name AS class_name, s.name AS subject_name
+        FROM programs p
+        JOIN classes c ON p.classe_id = c.id
+        JOIN subjects s ON p.subject_id = s.id
+    ';
+
+        $departments = Database::query(
+            "SELECT id, name FROM departments WHERE establishment_id = :est",
+            ['est' => $_SESSION['establishment_id']]
+        )->fetchAll(\PDO::FETCH_ASSOC);
+        // If user cannot view all reports, only give programs belonging to the same establishment
+
+        $school_years = Database::query(
+            "SELECT id, title, start_date, end_date FROM school_years ORDER BY start_date DESC"
+        )->fetchAll(\PDO::FETCH_ASSOC);
+
+
+        $programSql .= ' WHERE p.establishment_id = :p_est AND c.establishment_id = :p_est AND s.establishment_id = :p_est';
+
+        if ($this->hasPermission('view_department_reports')) {
+            if ($did) {
+                $programSql .= ' AND (c.department_id = :pd OR s.department_id = :pd)';
+                $programParams['pd'] = $did;
+
+                $departments = Database::query(
+                    "SELECT id, name FROM departments WHERE establishment_id = :est AND id = :pd",
+                    ['est' => $_SESSION['establishment_id'], 'pd' => $did]
+                )->fetchAll(\PDO::FETCH_ASSOC);
+            }
+        }
+        $programParams['p_est'] = $est;
+
+        $programSql .= ' ORDER BY c.name, s.name';
+
+        $programs = Database::query($programSql, $programParams)->fetchAll(\PDO::FETCH_ASSOC);
+
+        // Récupérer les couvertures groupées par semaine (pour le select multiple)
+        $coverageParams = [];
+        $coverageSql = "SELECT YEAR(r.created_at) AS yr, WEEK(r.created_at, 1) AS wk, MIN(DATE(r.created_at)) AS week_start, MAX(DATE(r.created_at)) AS week_end, SUM(r.nbr_hours_do) AS total_hours"
+            . " FROM weekly_coverage_reports r"
+            . " WHERE 1=1";
+
+        if ($est) {
+            $coverageSql .= ' AND r.establishment_id = :est';
+            $coverageParams['est'] = $est;
+        }
+
+        $coverageSql .= ' GROUP BY yr, wk ORDER BY yr DESC, wk DESC';
+        $coverageStmt = Database::query($coverageSql, $coverageParams);
+        $coverages = [];
+        while ($row = $coverageStmt->fetch(\PDO::FETCH_ASSOC)) {
+            $weekKey = $row['yr'] . '-W' . str_pad($row['wk'], 2, '0', STR_PAD_LEFT);
+            $coverages[] = [
+                'key' => $weekKey,
+                'start' => $row['week_start'],
+                'end' => $row['week_end'],
+                'total_hours' => $row['total_hours']
+            ];
+        }
+
+        return $this->view('pages/reports/consult', [
+            'reports' => $reports,
+            'programs' => $programs,
+            'departments' => $departments,
+            'coverages' => $coverages,
+            'school_years' => $school_years,
+        ]);
+    }
 
     public function create()
     {
@@ -174,6 +321,7 @@ class ReportController extends Controller
         $nbr_tp_do = max(0, intval($_POST['nbr_tp_do'] ?? 0));
         $nbr_tp_dig_do = max(0, intval($_POST['nbr_tp_dig_do'] ?? 0));
         $user_id = $_SESSION['user_id'] ?? null;
+
         if (!$program_id) {
             set_flash('error', 'Programme non sélectionné.');
             redirect('reports/create');

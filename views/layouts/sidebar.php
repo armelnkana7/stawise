@@ -171,7 +171,7 @@ if (isset($_SESSION['role_id'])) {
 
                             <?php if (!empty($userPerms['view_department_reports']) || !empty($userPerms['view_all_reports'])): ?>
                                 <div class="menu-item">
-                                    <a class="menu-link" href="<?php echo url('reports/view'); ?>">
+                                    <a class="menu-link" href="<?php echo url('reports/consult'); ?>">
                                         <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
                                         <span class="menu-title">Consulter les rapports</span>
                                     </a>
