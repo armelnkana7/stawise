@@ -1,0 +1,4 @@
+- [x] Modify generate method in ReportController.php to aggregate weekly_coverage_reports by class, calculate sums for planned and done, filter by establishment, get department name.
+- [ ] Update pdf_template.php to display department name, add columns for planned hours/lessons/tp and percentages, update table rows.
+- [ ] Update excel_template.php similarly to pdf_template.php.
+- [x] Verify the implementation.

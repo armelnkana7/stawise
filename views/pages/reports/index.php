@@ -73,7 +73,7 @@ require __DIR__ . '/../../layouts/header.php'; ?>
                             <!-- Départements -->
                             <div class="mb-3">
                                 <label class="form-label">Département</label>
-                                <select name="department_id" class="form-select" required>
+                                <select name="department_id" class="form-select">
                                     <option value="">Sélectionner un département</option>
                                     <?php foreach ($departments as $d): ?>
                                         <option value="<?php echo $d['id']; ?>">
@@ -402,7 +402,7 @@ require __DIR__ . '/../../layouts/header.php'; ?>
                                                         <div class="row">
                                                             <div class="col-md-12 mb-3">
                                                                 <label class="form-label">Programme</label>
-                                                                <select name="program_id" class="form-control" required
+                                                                <select name="" class="form-control" required
                                                                     disabled>
                                                                     <option value="">-- Sélectionner --</option>
                                                                     <?php foreach ($programs as $prog): ?>
@@ -411,10 +411,11 @@ require __DIR__ . '/../../layouts/header.php'; ?>
                                                                             <?= htmlspecialchars($prog['class_name'] . ' - ' . $prog['subject_name']); ?>
                                                                         </option>
                                                                     <?php endforeach; ?>
+                                                                    <?php $programId = $r['program_id']; ?>
                                                                 </select>
                                                             </div>
                                                         </div>
-
+                                                        <input type="hidden" name="program_id" value="<?= $programId; ?>" />
                                                         <div class="row">
                                                             <div class="col-md-6 mb-3">
                                                                 <label class="form-label">Heures faites</label>

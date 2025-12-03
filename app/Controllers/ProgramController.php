@@ -58,10 +58,11 @@ class ProgramController extends Controller
     {
         $this->requireAuth();
         $deptFilter = $_SESSION['department_id'] ?? null;
-        $sql = 'SELECT p.*, c.name as class_name, s.name as subject_name FROM programs p JOIN classes c ON p.classe_id = c.id JOIN subjects s ON p.subject_id = s.id';
-        $params = [];
+        $establishmentId = $_SESSION['establishment_id'] ?? null;
+        $sql = 'SELECT p.*, c.name as class_name, s.name as subject_name FROM programs p JOIN classes c ON p.classe_id = c.id JOIN subjects s ON p.subject_id = s.id WHERE c.establishment_id = :e AND s.establishment_id = :e AND p.establishment_id = :e';
+        $params = ['e' => $establishmentId];
         if ($deptFilter) {
-            $sql .= ' WHERE c.department_id = :d';
+            $sql .= ' AND c.department_id = :d';
             $params['d'] = $deptFilter;
         }
         $rows = Database::query($sql, $params)->fetchAll(\PDO::FETCH_ASSOC);
@@ -82,6 +83,7 @@ class ProgramController extends Controller
         $nbr_lesson_dig = intval($_POST['nbr_lesson_dig'] ?? 0);
         $nbr_tp = intval($_POST['nbr_tp'] ?? 0);
         $nbr_tp_dig = intval($_POST['nbr_tp_dig'] ?? 0);
+        $est = $_SESSION['establishment_id'] ?? null;
         $errors = [];
         if (!$classe_id) $errors[] = 'La classe est requise.';
         if (!$subject_id) $errors[] = 'La matière est requise.';
@@ -89,7 +91,7 @@ class ProgramController extends Controller
             set_flash('error', implode('; ', $errors));
             redirect('programs');
         }
-        Database::query('INSERT INTO programs (classe_id, subject_id, nbr_hours, nbr_lesson, nbr_lesson_dig, nbr_tp, nbr_tp_dig) VALUES (:c, :s, :h, :l, :ld, :tp, :tpd)', ['c' => $classe_id, 's' => $subject_id, 'h' => $nbr_hours, 'l' => $nbr_lesson, 'ld' => $nbr_lesson_dig, 'tp' => $nbr_tp, 'tpd' => $nbr_tp_dig]);
+        Database::query('INSERT INTO programs (classe_id, subject_id, nbr_hours, nbr_lesson, nbr_lesson_dig, nbr_tp, nbr_tp_dig, establishment_id) VALUES (:c, :s, :h, :l, :ld, :tp, :tpd, :e)', ['c' => $classe_id, 's' => $subject_id, 'h' => $nbr_hours, 'l' => $nbr_lesson, 'ld' => $nbr_lesson_dig, 'tp' => $nbr_tp, 'tpd' => $nbr_tp_dig, 'e' => $est]);
         set_flash('success', 'Programme créé.');
         $returnTo = $_POST['return_to'] ?? 'programs';
         // If AJAX (X-Requested-With header), return JSON

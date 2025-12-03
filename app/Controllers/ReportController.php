@@ -313,6 +313,7 @@ class ReportController extends Controller
             die('403 Forbidden - insufficient permissions to create reports.');
         }
         $this->validateCsrf();
+        $est = $_SESSION['establishment_id'] ?? null;
 
         $program_id = $_POST['program_id'] ?? null;
         $nbr_hours_do = max(0, intval($_POST['nbr_hours_do'] ?? 0));
@@ -334,7 +335,7 @@ class ReportController extends Controller
             redirect('reports/create');
         }
 
-        Database::query('INSERT INTO weekly_coverage_reports (program_id, recorded_by_user_id, nbr_hours_do, nbr_lesson_do, nbr_lesson_dig_do, nbr_tp_do, nbr_tp_dig_do) VALUES (:p, :u, :h, :l, :ld, :tp, :tpd)', ['p' => $program_id, 'u' => $user_id, 'h' => $nbr_hours_do, 'l' => $nbr_lesson_do, 'ld' => $nbr_lesson_dig_do, 'tp' => $nbr_tp_do, 'tpd' => $nbr_tp_dig_do]);
+        Database::query('INSERT INTO weekly_coverage_reports (program_id, recorded_by_user_id, nbr_hours_do, nbr_lesson_do, nbr_lesson_dig_do, nbr_tp_do, nbr_tp_dig_do, establishment_id) VALUES (:p, :u, :h, :l, :ld, :tp, :tpd, :e)', ['p' => $program_id, 'u' => $user_id, 'h' => $nbr_hours_do, 'l' => $nbr_lesson_do, 'ld' => $nbr_lesson_dig_do, 'tp' => $nbr_tp_do, 'tpd' => $nbr_tp_dig_do, 'e' => $est]);
 
         redirect('reports');
     }
@@ -450,26 +451,45 @@ class ReportController extends Controller
         $period = $_POST['period'] ?? null;
         $department_id = intval($_POST['department_id'] ?? 0);
         $report_type = $_POST['report_type'] ?? null;
+        $est = $_SESSION['establishment_id'] ?? null;
 
-        if (!$period || !$department_id || !in_array($report_type, ['pdf', 'excel'])) {
+        if (!$period || !in_array($report_type, ['pdf', 'excel'])) {
             set_flash('error', 'Paramètres invalides.');
             redirect('reports');
         }
 
-        // Query reports for the department and period (assuming period is start of week)
-        $sql = 'SELECT r.*, p.classe_id, p.subject_id, p.nbr_hours, p.nbr_lesson, p.nbr_lesson_dig, p.nbr_tp, p.nbr_tp_dig,
-                   c.name AS class_name, s.name AS subject_name, u.full_name AS recorded_by, d.name AS department_name
-            FROM weekly_coverage_reports r
-            LEFT JOIN programs p ON r.program_id = p.id
-            LEFT JOIN classes c ON p.classe_id = c.id
-            LEFT JOIN subjects s ON p.subject_id = s.id
-            LEFT JOIN users u ON r.recorded_by_user_id = u.id
-            LEFT JOIN departments d ON c.department_id = d.id
-            WHERE c.department_id = :dept AND DATE(r.created_at) >= :period
-            ORDER BY r.created_at DESC';
+        // If department_id is 0, show all departments (if est is null or all)
+        $filter_dept = $department_id > 0;
 
-        $params = ['dept' => $department_id, 'period' => $period];
-        $reports = Database::query($sql, $params)->fetchAll(\PDO::FETCH_ASSOC);
+        // Aggregate reports by department and subject
+        $sql = 'SELECT d.id AS department_id, d.name AS department_name, s.id AS subject_id, s.name AS subject_name,
+                       SUM(p.nbr_hours) AS planned_hours,
+                       SUM(p.nbr_lesson) AS planned_lessons,
+                       SUM(p.nbr_lesson_dig) AS planned_lesson_dig,
+                       SUM(p.nbr_tp) AS planned_tp,
+                       SUM(p.nbr_tp_dig) AS planned_tp_dig,
+                       SUM(r.nbr_hours_do) AS done_hours,
+                       SUM(r.nbr_lesson_do) AS done_lessons,
+                       SUM(r.nbr_lesson_dig_do) AS done_lesson_dig,
+                       SUM(r.nbr_tp_do) AS done_tp,
+                       SUM(r.nbr_tp_dig_do) AS done_tp_dig
+                FROM departments d
+                JOIN classes c ON c.department_id = d.id
+                JOIN programs p ON p.classe_id = c.id
+                JOIN subjects s ON p.subject_id = s.id
+                LEFT JOIN weekly_coverage_reports r ON r.program_id = p.id AND DATE(r.created_at) >= :period
+                WHERE (d.establishment_id = :est OR :est IS NULL)';
+
+        $params = ['period' => $period, 'est' => $est];
+
+        if ($filter_dept) {
+            $sql .= ' AND d.id = :dept';
+            $params['dept'] = $department_id;
+        }
+
+        $sql .= ' AND s.department_id = d.id GROUP BY d.id, d.name, s.id, s.name ORDER BY d.name, s.name';
+
+        $aggregated_reports = Database::query($sql, $params)->fetchAll(\PDO::FETCH_ASSOC);
 
         if ($report_type === 'pdf') {
             ob_start();

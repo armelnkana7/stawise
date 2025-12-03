@@ -192,11 +192,13 @@ require __DIR__ . '/../../layouts/header.php'; ?>
                         <!--end::Content-->
                     </div>
                     <div class="d-flex">
-                        <a class="btn btn-sm btn-outline-secondary me-2"
+                        <!-- <a class="btn btn-sm btn-outline-secondary me-2"
                             href="<?php echo url('reports/export') . (isset($_GET['q']) ? '?q=' . urlencode($_GET['q']) : ''); ?>">Exporter
                             CSV</a>
                         <button class="btn btn-sm btn-outline-secondary me-2" data-bs-toggle="modal"
-                            data-bs-target="#modalImportReports">Importer</button>
+                            data-bs-target="#modalImportReports">Importer</button> -->
+                        <button class="btn btn-sm btn-success me-2" data-bs-toggle="modal"
+                            data-bs-target="#modalDepartmentCreate">Ajouter un département</button>
 
                     </div>
                     <!-- Department create modal -->
